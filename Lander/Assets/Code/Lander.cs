@@ -1,16 +1,16 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class Lander : MonoBehaviour
+namespace Code
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public class Lander : MonoBehaviour
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        private void Update()
+        {
+            if (Keyboard.current.upArrowKey.isPressed)
+            {
+                Debug.Log("Up");
+            }
+        }
     }
 }
