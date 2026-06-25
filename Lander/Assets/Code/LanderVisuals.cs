@@ -14,9 +14,9 @@ namespace Code
         
         private void Awake()
         {
-            SetEnabledParticleSystem(leftThrusterParticle, false);
-            SetEnabledParticleSystem(middleThrusterParticle, false);
-            SetEnabledParticleSystem(rightThrusterParticle, false);
+            SetParticleSystem(leftThrusterParticle, false);
+            SetParticleSystem(middleThrusterParticle, false);
+            SetParticleSystem(rightThrusterParticle, false);
             
             playerLander = GetComponent<Lander>();
             playerLander.OnUpForce += PlayerLanderOnOnUpForce;
@@ -27,29 +27,29 @@ namespace Code
 
         private void PlayerLanderOnResetForce(object sender, EventArgs e)
         {
-            SetEnabledParticleSystem(leftThrusterParticle, false);
-            SetEnabledParticleSystem(middleThrusterParticle, false);
-            SetEnabledParticleSystem(rightThrusterParticle, false);
+            SetParticleSystem(leftThrusterParticle, false);
+            SetParticleSystem(middleThrusterParticle, false);
+            SetParticleSystem(rightThrusterParticle, false);
         }
 
         private void PlayerLanderOnOnRightForce(object sender, EventArgs e)
         {
-            SetEnabledParticleSystem(leftThrusterParticle, true);
+            SetParticleSystem(leftThrusterParticle, true);
         }
 
         private void PlayerLanderOnOnLeftForce(object sender, EventArgs e)
         {
-            SetEnabledParticleSystem(rightThrusterParticle, true);
+            SetParticleSystem(rightThrusterParticle, true);
         }
 
         private void PlayerLanderOnOnUpForce(object sender, EventArgs e)
         {
-            SetEnabledParticleSystem(leftThrusterParticle, true);
-            SetEnabledParticleSystem(middleThrusterParticle, true);
-            SetEnabledParticleSystem(rightThrusterParticle, true);
+            SetParticleSystem(leftThrusterParticle, true);
+            SetParticleSystem(middleThrusterParticle, true);
+            SetParticleSystem(rightThrusterParticle, true);
         }
 
-        private void SetEnabledParticleSystem(ParticleSystem ps, bool enableParticle)
+        private void SetParticleSystem(ParticleSystem ps, bool enableParticle)
         {
             ParticleSystem.EmissionModule emissionModule = ps.emission;
             emissionModule.enabled = enableParticle;

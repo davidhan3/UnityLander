@@ -6,8 +6,7 @@ namespace Code
 {
     public class Lander : MonoBehaviour
     {
-        public float mainThrust = 500;
-        public float adjustThrust = 200;
+
 
         public event EventHandler OnUpForce;
         public event EventHandler OnLeftForce;
@@ -15,15 +14,35 @@ namespace Code
         public event EventHandler ResetForce;
         
         private Rigidbody2D landerRigidBody2D;
+        [SerializeField] private float mainThrust = 500f;
+        [SerializeField] private float adjustThrust = 200f;
+        [SerializeField] private float fuelConsumedPerSecond = 1f;
+        [SerializeField] private float maxFuelAmount = 15f;
+
+        private float fuelAmount;
 
         private void Awake()
         {
             landerRigidBody2D = GetComponent<Rigidbody2D>();
+            fuelAmount = maxFuelAmount;
         }
 
         private void FixedUpdate()
         {
             ResetForce?.Invoke(this, EventArgs.Empty);
+
+
+
+            if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.leftArrowKey.isPressed ||
+                Keyboard.current.rightArrowKey.isPressed)
+            {
+                if (fuelAmount <= 0)
+                {
+                    Debug.Log("No fuel!");
+                    return;
+                }
+                ConsumeFuel();
+            }
             if (Keyboard.current.upArrowKey.isPressed)
             {
                 landerRigidBody2D.AddForce(transform.up * (mainThrust * Time.deltaTime));
@@ -80,6 +99,20 @@ namespace Code
 
             var totalScore = landingPad.GetScoreMultiplier() * (landingAngleScore + landingSpeedScore);
             Debug.Log("Total Score: " + totalScore);
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            if (other.gameObject.TryGetComponent(out FuelPickup fuel))
+            {
+                fuelAmount += fuel.GetFuelAmount();
+                fuel.DestroySelf();
+            }
+        }
+
+        private void ConsumeFuel()
+        {
+            fuelAmount -= fuelConsumedPerSecond * Time.deltaTime;
         }
     }
 }
