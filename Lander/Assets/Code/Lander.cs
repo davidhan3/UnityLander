@@ -8,6 +8,11 @@ namespace Code
     {
         public float mainThrust = 500;
         public float adjustThrust = 200;
+
+        public event EventHandler OnUpForce;
+        public event EventHandler OnLeftForce;
+        public event EventHandler OnRightForce;
+        public event EventHandler ResetForce;
         
         private Rigidbody2D landerRigidBody2D;
 
@@ -18,17 +23,21 @@ namespace Code
 
         private void FixedUpdate()
         {
+            ResetForce?.Invoke(this, EventArgs.Empty);
             if (Keyboard.current.upArrowKey.isPressed)
             {
                 landerRigidBody2D.AddForce(transform.up * (mainThrust * Time.deltaTime));
+                OnUpForce?.Invoke(this, EventArgs.Empty);
             }
             if (Keyboard.current.leftArrowKey.isPressed)
             {
                 landerRigidBody2D.AddTorque(adjustThrust * Time.deltaTime);
+                OnLeftForce?.Invoke(this, EventArgs.Empty);
             }
             if (Keyboard.current.rightArrowKey.isPressed)
             {
                 landerRigidBody2D.AddTorque(-adjustThrust * Time.deltaTime);
+                OnRightForce?.Invoke(this, EventArgs.Empty);
             }
         }
 
