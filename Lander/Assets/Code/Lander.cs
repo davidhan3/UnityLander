@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,12 +7,14 @@ namespace Code
 {
     public class Lander : MonoBehaviour
     {
-
-
+        public static Lander Instance {get; private set; }
+        
         public event EventHandler OnUpForce;
         public event EventHandler OnLeftForce;
         public event EventHandler OnRightForce;
         public event EventHandler ResetForce;
+        public event Action<int> OnCoinPickup;
+        public event Action<int> OnLanding;
         
         private Rigidbody2D landerRigidBody2D;
         [SerializeField] private float mainThrust = 500f;
@@ -23,6 +26,7 @@ namespace Code
 
         private void Awake()
         {
+            Instance = this;
             landerRigidBody2D = GetComponent<Rigidbody2D>();
             fuelAmount = maxFuelAmount;
         }
@@ -30,8 +34,6 @@ namespace Code
         private void FixedUpdate()
         {
             ResetForce?.Invoke(this, EventArgs.Empty);
-
-
 
             if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.leftArrowKey.isPressed ||
                 Keyboard.current.rightArrowKey.isPressed)
@@ -97,8 +99,9 @@ namespace Code
             Debug.Log("Landing Angle Score: " + landingAngleScore);
             Debug.Log("Landing Speed Score: " + landingSpeedScore);
 
-            var totalScore = landingPad.GetScoreMultiplier() * (landingAngleScore + landingSpeedScore);
+            var totalScore = (int)(landingPad.GetScoreMultiplier() * (landingAngleScore + landingSpeedScore));
             Debug.Log("Total Score: " + totalScore);
+            OnLanding?.Invoke(totalScore);
         }
 
         private void OnTriggerEnter2D(Collider2D other)
@@ -107,6 +110,11 @@ namespace Code
             {
                 fuelAmount += fuel.GetFuelAmount();
                 fuel.DestroySelf();
+            }
+            else if (other.gameObject.TryGetComponent(out CoinPickup coinPickup))
+            {
+                OnCoinPickup?.Invoke(coinPickup.GetWorth());
+                coinPickup.DestroySelf();
             }
         }
 
