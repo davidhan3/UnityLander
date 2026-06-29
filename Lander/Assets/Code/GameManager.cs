@@ -12,7 +12,7 @@ namespace Code
         {
             Instance = this;
         }
-        
+
         private void Start()
         {
             Lander.Instance.OnCoinPickup += PlayerOnOnCoinPickup;
@@ -24,9 +24,9 @@ namespace Code
             time += Time.deltaTime;
         }
 
-        private void InstanceOnOnLanding(int landingScore)
+        private void InstanceOnOnLanding(object sender, Lander.OnLandedEventArgs args)
         {
-            score += landingScore;
+            score += args.Score;
             Debug.Log("Current score: " + score);
         }
 

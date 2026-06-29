@@ -14,7 +14,24 @@ namespace Code
         public event EventHandler OnRightForce;
         public event EventHandler ResetForce;
         public event Action<int> OnCoinPickup;
-        public event Action<int> OnLanding;
+        public event EventHandler<OnLandedEventArgs> OnLanding;
+
+        public class OnLandedEventArgs : EventArgs
+        {
+            public LandingType LandingType;
+            public float landingSpeed;
+            public float landingAngle;
+            public int scoreMultiplier;
+            public int Score;
+        }
+
+        public enum LandingType
+        {
+            Success,
+            WrongLandingArea,
+            TooSteep,
+            TooFast
+        }
 
         private Rigidbody2D landerRigidBody2D;
         [SerializeField] private float mainThrust = 500f;
@@ -68,45 +85,60 @@ namespace Code
 
         private void OnCollisionEnter2D(Collision2D collision2D)
         {
+            var landingType = LandingType.Success;
+            var landingSpeed = collision2D.relativeVelocity.magnitude;
+            var landingAngle = Math.Abs(Vector2.Dot(Vector2.up, transform.up));
+
             if (!collision2D.gameObject.TryGetComponent(out LandingPad landingPad))
             {
-                Debug.Log("Terrain Crashed");
-                return;
+                landingType = LandingType.WrongLandingArea;
             }
 
             const float softLandingVelocityThreshold = 3f;
-            var landingSpeed = collision2D.relativeVelocity.magnitude;
 
             if (landingSpeed > softLandingVelocityThreshold)
             {
-                Debug.Log("Hard Landing");
-                return;
+                landingType = LandingType.TooFast;
             }
 
             const float softLandingAngleThreshold = .9f;
-            var dotVector = Math.Abs(Vector2.Dot(Vector2.up, transform.up));
-            if (dotVector < softLandingAngleThreshold)
+            if (landingAngle < softLandingAngleThreshold)
             {
-                Debug.Log("Landing angle too steep");
-                return;
+                landingType = LandingType.TooSteep;
             }
 
-            Debug.Log("Successful Landing");
+            if (landingType != LandingType.Success)
+            {
+                OnLanding?.Invoke(this, new OnLandedEventArgs
+                {
+                    LandingType = landingType,
+                    landingSpeed = landingSpeed,
+                    landingAngle = landingAngle,
+                    scoreMultiplier = 0,
+                    Score = 0
+                });
+                return;
+            }
 
             const float maxScoreAmountLandingAngle = 100;
             const float scoreDotVectorMultiplier = 10;
 
             var landingAngleScore = maxScoreAmountLandingAngle -
-                                    Mathf.Abs(dotVector - 1f) * scoreDotVectorMultiplier * maxScoreAmountLandingAngle;
+                                    Mathf.Abs(landingAngle - 1f) * scoreDotVectorMultiplier *
+                                    maxScoreAmountLandingAngle;
             const float maxScoreAmountLandingSpeed = 100;
             var landingSpeedScore = (softLandingVelocityThreshold - landingSpeed) * maxScoreAmountLandingSpeed;
 
-            Debug.Log("Landing Angle Score: " + landingAngleScore);
-            Debug.Log("Landing Speed Score: " + landingSpeedScore);
-
-            var totalScore = (int)(landingPad.GetScoreMultiplier() * (landingAngleScore + landingSpeedScore));
-            Debug.Log("Total Score: " + totalScore);
-            OnLanding?.Invoke(totalScore);
+            var landingPadScoreMultiplier = landingPad.GetScoreMultiplier();
+            var totalScore = (int)(landingPadScoreMultiplier * (landingAngleScore + landingSpeedScore));
+            OnLanding?.Invoke(this, new OnLandedEventArgs
+            {
+                LandingType = landingType,
+                landingSpeed = landingSpeed,
+                landingAngle = landingAngle,
+                scoreMultiplier = landingPadScoreMultiplier,
+                Score = totalScore
+            });
         }
 
         private void OnTriggerEnter2D(Collider2D other)
