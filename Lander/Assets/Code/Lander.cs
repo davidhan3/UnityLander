@@ -1,5 +1,4 @@
 using System;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,19 +8,28 @@ namespace Code
     {
         public static Lander Instance { get; private set; }
 
+        private const float GRAVITY_SCALE = 0.7f;
+
         public event EventHandler OnUpForce;
         public event EventHandler OnLeftForce;
         public event EventHandler OnRightForce;
         public event EventHandler ResetForce;
         public event Action<int> OnCoinPickup;
+        public event EventHandler<OnStateChangedArgs> OnStateChanged;
+
+        public class OnStateChangedArgs : EventArgs
+        {
+            public GameState State;
+        }
+
         public event EventHandler<OnLandedEventArgs> OnLanding;
 
         public class OnLandedEventArgs : EventArgs
         {
             public LandingType LandingType;
-            public float landingSpeed;
-            public float landingAngle;
-            public int scoreMultiplier;
+            public float LandingSpeed;
+            public float LandingAngle;
+            public int ScoreMultiplier;
             public int Score;
         }
 
@@ -33,53 +41,80 @@ namespace Code
             TooFast
         }
 
-        private Rigidbody2D landerRigidBody2D;
+        private GameState CurrentPlayState;
+
+        public enum GameState
+        {
+            WaitingToStart,
+            Playing,
+            GameEnded,
+        }
+
         [SerializeField] private float mainThrust = 500f;
         [SerializeField] private float adjustThrust = 200f;
         [SerializeField] private float fuelConsumedPerSecond = 1f;
         [SerializeField] private float maxFuelAmount = 15f;
-
-        private float currentFuelAmount;
+        private Rigidbody2D LanderRigidBody2D;
+        private float CurrentFuelAmount;
 
         private void Awake()
         {
             Instance = this;
-            landerRigidBody2D = GetComponent<Rigidbody2D>();
-            currentFuelAmount = maxFuelAmount;
+            LanderRigidBody2D = GetComponent<Rigidbody2D>();
+            LanderRigidBody2D.gravityScale = 0f;
+            CurrentFuelAmount = maxFuelAmount;
+            CurrentPlayState = GameState.WaitingToStart;
         }
 
         private void FixedUpdate()
         {
             ResetForce?.Invoke(this, EventArgs.Empty);
 
-            if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.leftArrowKey.isPressed ||
-                Keyboard.current.rightArrowKey.isPressed)
+            switch (CurrentPlayState)
             {
-                if (currentFuelAmount <= 0)
-                {
-                    Debug.Log("No fuel!");
-                    return;
-                }
+                case GameState.Playing:
+                    if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.leftArrowKey.isPressed ||
+                        Keyboard.current.rightArrowKey.isPressed)
+                    {
+                        if (CurrentFuelAmount <= 0)
+                        {
+                            return;
+                        }
 
-                ConsumeFuel();
-            }
+                        ConsumeFuel();
+                        LanderRigidBody2D.gravityScale = GRAVITY_SCALE;
+                    }
 
-            if (Keyboard.current.upArrowKey.isPressed)
-            {
-                landerRigidBody2D.AddForce(transform.up * (mainThrust * Time.deltaTime));
-                OnUpForce?.Invoke(this, EventArgs.Empty);
-            }
+                    if (Keyboard.current.upArrowKey.isPressed)
+                    {
+                        LanderRigidBody2D.AddForce(transform.up * (mainThrust * Time.deltaTime));
+                        OnUpForce?.Invoke(this, EventArgs.Empty);
+                    }
 
-            if (Keyboard.current.leftArrowKey.isPressed)
-            {
-                landerRigidBody2D.AddTorque(adjustThrust * Time.deltaTime);
-                OnLeftForce?.Invoke(this, EventArgs.Empty);
-            }
+                    if (Keyboard.current.leftArrowKey.isPressed)
+                    {
+                        LanderRigidBody2D.AddTorque(adjustThrust * Time.deltaTime);
+                        OnLeftForce?.Invoke(this, EventArgs.Empty);
+                    }
 
-            if (Keyboard.current.rightArrowKey.isPressed)
-            {
-                landerRigidBody2D.AddTorque(-adjustThrust * Time.deltaTime);
-                OnRightForce?.Invoke(this, EventArgs.Empty);
+                    if (Keyboard.current.rightArrowKey.isPressed)
+                    {
+                        LanderRigidBody2D.AddTorque(-adjustThrust * Time.deltaTime);
+                        OnRightForce?.Invoke(this, EventArgs.Empty);
+                    }
+
+                    break;
+                case GameState.WaitingToStart:
+                    if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.leftArrowKey.isPressed ||
+                        Keyboard.current.rightArrowKey.isPressed)
+                    {
+                        LanderRigidBody2D.gravityScale = GRAVITY_SCALE;
+                        SetGameState(GameState.Playing);
+                    }
+
+                    break;
+                case GameState.GameEnded:
+                    break;
             }
         }
 
@@ -109,12 +144,13 @@ namespace Code
 
             if (landingType != LandingType.Success)
             {
+                SetGameState(GameState.GameEnded);
                 OnLanding?.Invoke(this, new OnLandedEventArgs
                 {
                     LandingType = landingType,
-                    landingSpeed = landingSpeed,
-                    landingAngle = landingAngle,
-                    scoreMultiplier = 0,
+                    LandingSpeed = landingSpeed,
+                    LandingAngle = landingAngle,
+                    ScoreMultiplier = 0,
                     Score = 0
                 });
                 return;
@@ -134,24 +170,20 @@ namespace Code
             OnLanding?.Invoke(this, new OnLandedEventArgs
             {
                 LandingType = landingType,
-                landingSpeed = landingSpeed,
-                landingAngle = landingAngle,
-                scoreMultiplier = landingPadScoreMultiplier,
+                LandingSpeed = landingSpeed,
+                LandingAngle = landingAngle,
+                ScoreMultiplier = landingPadScoreMultiplier,
                 Score = totalScore
             });
+            SetGameState(GameState.GameEnded);
         }
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (other.gameObject.TryGetComponent(out FuelPickup fuel))
+            if (other.gameObject.TryGetComponent(out FuelPickup fuelPickup))
             {
-                currentFuelAmount += fuel.GetFuelAmount();
-                if (currentFuelAmount > maxFuelAmount)
-                {
-                    currentFuelAmount = maxFuelAmount;
-                }
-
-                fuel.DestroySelf();
+                IncreaseFuel(fuelPickup.GetFuelAmount());
+                fuelPickup.DestroySelf();
             }
             else if (other.gameObject.TryGetComponent(out CoinPickup coinPickup))
             {
@@ -160,14 +192,32 @@ namespace Code
             }
         }
 
+        private void SetGameState(GameState state)
+        {
+            CurrentPlayState = state;
+            OnStateChanged?.Invoke(this, new OnStateChangedArgs
+            {
+                State = state
+            });
+        }
+
         private void ConsumeFuel()
         {
-            currentFuelAmount -= fuelConsumedPerSecond * Time.deltaTime;
+            CurrentFuelAmount -= fuelConsumedPerSecond * Time.deltaTime;
+        }
+
+        private void IncreaseFuel(float increaseAmount)
+        {
+            CurrentFuelAmount += increaseAmount;
+            if (CurrentFuelAmount > maxFuelAmount)
+            {
+                CurrentFuelAmount = maxFuelAmount;
+            }
         }
 
         public float GetCurrentFuelAmount()
         {
-            return currentFuelAmount;
+            return CurrentFuelAmount;
         }
 
         public float GetMaxFuelAmount()
@@ -177,12 +227,12 @@ namespace Code
 
         public float GetSpeedX()
         {
-            return landerRigidBody2D.linearVelocityX;
+            return LanderRigidBody2D.linearVelocityX;
         }
 
         public float GetSpeedY()
         {
-            return landerRigidBody2D.linearVelocityY;
+            return LanderRigidBody2D.linearVelocityY;
         }
     }
 }

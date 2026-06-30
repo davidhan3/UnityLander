@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Code
@@ -5,45 +6,59 @@ namespace Code
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
-        private int score;
-        private float time = 0;
+        private int Score;
+        private float GameTime;
+        private bool GameActive;
 
         private void Awake()
         {
             Instance = this;
+            GameActive = false;
         }
 
         private void Start()
         {
-            Lander.Instance.OnCoinPickup += PlayerOnOnCoinPickup;
-            Lander.Instance.OnLanding += InstanceOnOnLanding;
+            Lander.Instance.OnCoinPickup += Player_OnCoinPickup;
+            Lander.Instance.OnLanding += Player_OnLanding;
+            Lander.Instance.OnStateChanged += Player_OnStateChange;
+        }
+
+        private void Player_OnStateChange(object sender, Lander.OnStateChangedArgs args)
+        {
+            switch (args.State)
+            {
+                case Lander.GameState.Playing:
+                    GameActive = true;
+                    break;
+            }
         }
 
         private void Update()
         {
-            time += Time.deltaTime;
+            if (GameActive)
+            {
+                GameTime += Time.deltaTime;
+            }
         }
 
-        private void InstanceOnOnLanding(object sender, Lander.OnLandedEventArgs args)
+        private void Player_OnLanding(object sender, Lander.OnLandedEventArgs args)
         {
-            score += args.Score;
-            Debug.Log("Current score: " + score);
+            Score += args.Score;
         }
 
-        private void PlayerOnOnCoinPickup(int coinWorth)
+        private void Player_OnCoinPickup(int coinWorth)
         {
-            score += coinWorth;
-            Debug.Log("Current score: " + score);
+            Score += coinWorth;
         }
 
         public int GetScore()
         {
-            return score;
+            return Score;
         }
 
         public float GetTime()
         {
-            return time;
+            return GameTime;
         }
     }
 }

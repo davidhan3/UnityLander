@@ -1,5 +1,8 @@
+using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace Code
 {
@@ -7,6 +10,12 @@ namespace Code
     {
         [SerializeField] private TextMeshProUGUI titleText;
         [SerializeField] private TextMeshProUGUI statsText;
+        [SerializeField] private Button nextButton;
+
+        private void Awake()
+        {
+            nextButton.onClick.AddListener(() => { SceneManager.LoadScene(0); });
+        }
 
         private void Start()
         {
@@ -16,7 +25,6 @@ namespace Code
 
         private void Lander_OnLanding(object sender, Lander.OnLandedEventArgs args)
         {
-            Debug.Log("On Landing triggered");
             if (args.LandingType == Lander.LandingType.Success)
             {
                 titleText.text = "Successful Landing!";
@@ -26,13 +34,13 @@ namespace Code
                 titleText.text = "<color=#FF0000> CRASHED!</color>";
             }
 
-            var landingSpeed = Mathf.Round(args.landingSpeed) * 10;
-            var landingAngle = Mathf.Round(args.landingAngle * 100);
+            var landingSpeed = Mathf.Round(args.LandingSpeed) * 10;
+            var landingAngle = Mathf.Round(args.LandingAngle * 100);
             var finalScore = GameManager.Instance.GetScore() + args.Score;
 
             statsText.text = landingSpeed + "\n" +
                              landingAngle + "\n" +
-                             "x" + args.scoreMultiplier + "\n" +
+                             "x" + args.ScoreMultiplier + "\n" +
                              finalScore;
 
             gameObject.SetActive(true);
