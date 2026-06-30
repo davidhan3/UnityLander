@@ -10,11 +10,14 @@ namespace Code
     {
         [SerializeField] private TextMeshProUGUI titleText;
         [SerializeField] private TextMeshProUGUI statsText;
+        [SerializeField] private TextMeshProUGUI nextButtonTextMesh;
         [SerializeField] private Button nextButton;
+
+        private Action nextButtonClickAction;
 
         private void Awake()
         {
-            nextButton.onClick.AddListener(() => { SceneManager.LoadScene(0); });
+            nextButton.onClick.AddListener(() => { nextButtonClickAction(); });
         }
 
         private void Start()
@@ -28,10 +31,14 @@ namespace Code
             if (args.LandingType == Lander.LandingType.Success)
             {
                 titleText.text = "Successful Landing!";
+                nextButtonTextMesh.text = "Continue";
+                nextButtonClickAction = GameManager.Instance.GoToNextLevel;
             }
             else
             {
                 titleText.text = "<color=#FF0000> CRASHED!</color>";
+                nextButtonTextMesh.text = "Retry";
+                nextButtonClickAction = GameManager.Instance.RetryLevel;
             }
 
             var landingSpeed = Mathf.Round(args.LandingSpeed) * 10;

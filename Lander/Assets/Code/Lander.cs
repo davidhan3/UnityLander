@@ -41,7 +41,7 @@ namespace Code
             TooFast
         }
 
-        private GameState CurrentPlayState;
+        private GameState currentPlayState;
 
         public enum GameState
         {
@@ -54,52 +54,52 @@ namespace Code
         [SerializeField] private float adjustThrust = 200f;
         [SerializeField] private float fuelConsumedPerSecond = 1f;
         [SerializeField] private float maxFuelAmount = 15f;
-        private Rigidbody2D LanderRigidBody2D;
-        private float CurrentFuelAmount;
+        private Rigidbody2D landerRigidBody2D;
+        private float currentFuelAmount;
 
         private void Awake()
         {
             Instance = this;
-            LanderRigidBody2D = GetComponent<Rigidbody2D>();
-            LanderRigidBody2D.gravityScale = 0f;
-            CurrentFuelAmount = maxFuelAmount;
-            CurrentPlayState = GameState.WaitingToStart;
+            landerRigidBody2D = GetComponent<Rigidbody2D>();
+            landerRigidBody2D.gravityScale = 0f;
+            currentFuelAmount = maxFuelAmount;
+            currentPlayState = GameState.WaitingToStart;
         }
 
         private void FixedUpdate()
         {
             ResetForce?.Invoke(this, EventArgs.Empty);
 
-            switch (CurrentPlayState)
+            switch (currentPlayState)
             {
                 case GameState.Playing:
                     if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.leftArrowKey.isPressed ||
                         Keyboard.current.rightArrowKey.isPressed)
                     {
-                        if (CurrentFuelAmount <= 0)
+                        if (currentFuelAmount <= 0)
                         {
                             return;
                         }
 
                         ConsumeFuel();
-                        LanderRigidBody2D.gravityScale = GRAVITY_SCALE;
+                        landerRigidBody2D.gravityScale = GRAVITY_SCALE;
                     }
 
                     if (Keyboard.current.upArrowKey.isPressed)
                     {
-                        LanderRigidBody2D.AddForce(transform.up * (mainThrust * Time.deltaTime));
+                        landerRigidBody2D.AddForce(transform.up * (mainThrust * Time.deltaTime));
                         OnUpForce?.Invoke(this, EventArgs.Empty);
                     }
 
                     if (Keyboard.current.leftArrowKey.isPressed)
                     {
-                        LanderRigidBody2D.AddTorque(adjustThrust * Time.deltaTime);
+                        landerRigidBody2D.AddTorque(adjustThrust * Time.deltaTime);
                         OnLeftForce?.Invoke(this, EventArgs.Empty);
                     }
 
                     if (Keyboard.current.rightArrowKey.isPressed)
                     {
-                        LanderRigidBody2D.AddTorque(-adjustThrust * Time.deltaTime);
+                        landerRigidBody2D.AddTorque(-adjustThrust * Time.deltaTime);
                         OnRightForce?.Invoke(this, EventArgs.Empty);
                     }
 
@@ -108,7 +108,7 @@ namespace Code
                     if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.leftArrowKey.isPressed ||
                         Keyboard.current.rightArrowKey.isPressed)
                     {
-                        LanderRigidBody2D.gravityScale = GRAVITY_SCALE;
+                        landerRigidBody2D.gravityScale = GRAVITY_SCALE;
                         SetGameState(GameState.Playing);
                     }
 
@@ -194,7 +194,7 @@ namespace Code
 
         private void SetGameState(GameState state)
         {
-            CurrentPlayState = state;
+            currentPlayState = state;
             OnStateChanged?.Invoke(this, new OnStateChangedArgs
             {
                 State = state
@@ -203,21 +203,21 @@ namespace Code
 
         private void ConsumeFuel()
         {
-            CurrentFuelAmount -= fuelConsumedPerSecond * Time.deltaTime;
+            currentFuelAmount -= fuelConsumedPerSecond * Time.deltaTime;
         }
 
         private void IncreaseFuel(float increaseAmount)
         {
-            CurrentFuelAmount += increaseAmount;
-            if (CurrentFuelAmount > maxFuelAmount)
+            currentFuelAmount += increaseAmount;
+            if (currentFuelAmount > maxFuelAmount)
             {
-                CurrentFuelAmount = maxFuelAmount;
+                currentFuelAmount = maxFuelAmount;
             }
         }
 
         public float GetCurrentFuelAmount()
         {
-            return CurrentFuelAmount;
+            return currentFuelAmount;
         }
 
         public float GetMaxFuelAmount()
@@ -227,12 +227,12 @@ namespace Code
 
         public float GetSpeedX()
         {
-            return LanderRigidBody2D.linearVelocityX;
+            return landerRigidBody2D.linearVelocityX;
         }
 
         public float GetSpeedY()
         {
-            return LanderRigidBody2D.linearVelocityY;
+            return landerRigidBody2D.linearVelocityY;
         }
     }
 }

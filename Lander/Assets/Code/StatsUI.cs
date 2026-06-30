@@ -38,7 +38,8 @@ namespace Code
 
             fuelBar.fillAmount = Lander.Instance.GetCurrentFuelAmount() / Lander.Instance.GetMaxFuelAmount();
 
-            statsMesh.text = score + "\n" +
+            statsMesh.text = GameManager.Instance.GetLevelNumber() + "\n" +
+                             score + "\n" +
                              time + "\n" +
                              speedX + "\n" +
                              speedY + "\n";
