@@ -592,6 +592,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 958960533286312429}
     m_Modifications:
+    - target: {fileID: 1802532748805311866, guid: 13d255596d3345aedb4c9ea05f51664d, type: 3}
+      propertyPath: m_Size.x
+      value: 0.5950041
+      objectReference: {fileID: 0}
+    - target: {fileID: 1802532748805311866, guid: 13d255596d3345aedb4c9ea05f51664d, type: 3}
+      propertyPath: m_Offset.x
+      value: 0.0016121864
+      objectReference: {fileID: 0}
+    - target: {fileID: 1802532748805311866, guid: 13d255596d3345aedb4c9ea05f51664d, type: 3}
+      propertyPath: m_Offset.y
+      value: -0.008862615
+      objectReference: {fileID: 0}
     - target: {fileID: 5705514930453933523, guid: 13d255596d3345aedb4c9ea05f51664d, type: 3}
       propertyPath: m_Name
       value: FuelPickup
