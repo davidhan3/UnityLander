@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -9,8 +10,9 @@ namespace Code
         public static GameManager Instance { get; private set; }
 
         [SerializeField] private List<GameLevel> gameLevelList;
+        [SerializeField] private CinemachineCamera cinemachineCamera;
 
-        private static int currentLevelNumber = 1;
+        private static int currentLevelNumber;
 
         private int score;
         private float gameTime;
@@ -20,6 +22,7 @@ namespace Code
         {
             Instance = this;
             gameActive = false;
+            currentLevelNumber = gameLevelList[0].GetLevelNumber();
         }
 
         private void Start()
@@ -39,6 +42,9 @@ namespace Code
                 {
                     var spawnedLevel = Instantiate(gameLevel, Vector3.zero, Quaternion.identity);
                     Lander.Instance.transform.position = spawnedLevel.GetLanderStartPosition();
+                    cinemachineCamera.Target.TrackingTarget = spawnedLevel.GetCameraStartTarget();
+                    CinemachineCameraZoom2D.Instance.SetTargetOrthographicSize(
+                        spawnedLevel.GetZoomedOutOrthographicSize());
                 }
             }
         }
@@ -49,6 +55,8 @@ namespace Code
             {
                 case Lander.GameState.Playing:
                     gameActive = true;
+                    cinemachineCamera.Target.TrackingTarget = Lander.Instance.transform;
+                    CinemachineCameraZoom2D.Instance.SetNormalOrthographicSize();
                     break;
             }
         }

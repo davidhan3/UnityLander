@@ -119,6 +119,51 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &17795357
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 17795359}
+  - component: {fileID: 17795360}
+  m_Layer: 0
+  m_Name: CinemachineCameraZoom2D
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &17795359
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 17795357}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 129.62335, y: 107.26622, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &17795360
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 17795357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 473ac4fb558bc5391a354d478e36f8e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Code.NewMonoBehaviourScript
+  cinemachineCamera: {fileID: 1300314470}
 --- !u!4 &62102186 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7777506112856376982, guid: 491bc9f68306cad40a65002e796205eb, type: 3}
@@ -1256,8 +1301,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   gameLevelList:
-  - {fileID: 3071218653524667640, guid: 6a959d5c3a8d3e7a7accdbc4fbc23fc2, type: 3}
   - {fileID: 3071218653524667640, guid: f89393596c2d7beb7bace9463f305817, type: 3}
+  - {fileID: 3071218653524667640, guid: 6a959d5c3a8d3e7a7accdbc4fbc23fc2, type: 3}
+  cinemachineCamera: {fileID: 1300314470}
 --- !u!4 &787568476
 Transform:
   m_ObjectHideFlags: 0
@@ -2564,6 +2610,7 @@ MonoBehaviour:
   adjustThrust: 200
   fuelConsumedPerSecond: 1
   maxFuelAmount: 15
+  cinemachineCamera: {fileID: 1300314470}
 --- !u!114 &1754163679
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3067,3 +3114,4 @@ SceneRoots:
   - {fileID: 787568476}
   - {fileID: 1831582087}
   - {fileID: 879384741}
+  - {fileID: 17795359}

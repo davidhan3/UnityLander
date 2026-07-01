@@ -1,4 +1,5 @@
 using System;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -54,6 +55,7 @@ namespace Code
         [SerializeField] private float adjustThrust = 200f;
         [SerializeField] private float fuelConsumedPerSecond = 1f;
         [SerializeField] private float maxFuelAmount = 15f;
+        [SerializeField] private CinemachineCamera cinemachineCamera;
         private Rigidbody2D landerRigidBody2D;
         private float currentFuelAmount;
 
