@@ -75,8 +75,7 @@ namespace Code
             switch (currentPlayState)
             {
                 case GameState.Playing:
-                    if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.leftArrowKey.isPressed ||
-                        Keyboard.current.rightArrowKey.isPressed)
+                    if (GameInput.Instance.IsAnyKeyPressed())
                     {
                         if (currentFuelAmount <= 0)
                         {
@@ -87,19 +86,19 @@ namespace Code
                         landerRigidBody2D.gravityScale = GRAVITY_SCALE;
                     }
 
-                    if (Keyboard.current.upArrowKey.isPressed)
+                    if (GameInput.Instance.IsUpActionPressed())
                     {
                         landerRigidBody2D.AddForce(transform.up * (mainThrust * Time.deltaTime));
                         OnUpForce?.Invoke(this, EventArgs.Empty);
                     }
 
-                    if (Keyboard.current.leftArrowKey.isPressed)
+                    if (GameInput.Instance.IsLeftActionPressed())
                     {
                         landerRigidBody2D.AddTorque(adjustThrust * Time.deltaTime);
                         OnLeftForce?.Invoke(this, EventArgs.Empty);
                     }
 
-                    if (Keyboard.current.rightArrowKey.isPressed)
+                    if (GameInput.Instance.IsRightActionPressed())
                     {
                         landerRigidBody2D.AddTorque(-adjustThrust * Time.deltaTime);
                         OnRightForce?.Invoke(this, EventArgs.Empty);
@@ -107,8 +106,7 @@ namespace Code
 
                     break;
                 case GameState.WaitingToStart:
-                    if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.leftArrowKey.isPressed ||
-                        Keyboard.current.rightArrowKey.isPressed)
+                    if (GameInput.Instance.IsAnyKeyPressed())
                     {
                         landerRigidBody2D.gravityScale = GRAVITY_SCALE;
                         SetGameState(GameState.Playing);
